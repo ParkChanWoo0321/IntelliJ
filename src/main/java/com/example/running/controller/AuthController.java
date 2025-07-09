@@ -1,13 +1,10 @@
 package com.example.running.controller;
 
-import com.example.running.dto.SignupRequestDto;
-import com.example.running.dto.SignupResponseDto;
+import com.example.running.dto.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import com.example.running.CommonResponse;
-import com.example.running.dto.LoginRequestDto;
-import com.example.running.dto.LoginResponseDto;
 import com.example.running.entity.User;
 import com.example.running.service.AuthService;
 import com.example.running.service.BadgeService;
@@ -21,6 +18,7 @@ public class AuthController {
     private final AuthService authService;
     private final BadgeService badgeService;  // BadgeService 주입
 
+    // 로그인 API
     @PostMapping("/login")
     public ResponseEntity<CommonResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto request,
                                                                   HttpServletRequest httpRequest) {
@@ -39,11 +37,12 @@ public class AuthController {
         );
     }
 
+    // 회원가입 API
     @PostMapping("/signup")
     public ResponseEntity<CommonResponse<SignupResponseDto>> signup(@RequestBody SignupRequestDto request) {
         User user = authService.signup(request);
 
-        // 회원가입 직후 좋아요 0으로 뱃지 부여
+        // 회원가입 직후 좋아요 0 으로 초보러너 뱃지 부여
         badgeService.checkAndAssignBadge(user, 0);
 
         SignupResponseDto response = new SignupResponseDto(user.getUserId(), user.getUsername(), user.getNickname());
@@ -56,9 +55,10 @@ public class AuthController {
         );
     }
 
+    // 로그아웃 API
     @PostMapping("/logout")
     public ResponseEntity<CommonResponse<String>> logout(HttpServletRequest request) {
-        HttpSession session = request.getSession(false); // 세션이 없으면 null
+        HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate(); // 세션 무효화
         }
@@ -70,5 +70,18 @@ public class AuthController {
                         .data("세션이 종료되었습니다.")
                         .build()
         );
+    }
+
+    // 로그인 상태 확인
+    @GetMapping("/check")
+    public ResponseEntity<?> checkLogin(@RequestParam Long userId) {
+        return authService.checkUser(userId);
+    }
+
+    // 유저 프로필 조회
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponseDto> getUserProfile(@PathVariable Long userId) {
+        UserResponseDto response = authService.getUserProfile(userId);
+        return ResponseEntity.ok(response);
     }
 }

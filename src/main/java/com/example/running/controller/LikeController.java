@@ -17,9 +17,7 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    /**
-     * 게시글 좋아요 토글 API (userId 직접 전달)
-     */
+    // 게시글 좋아요
     @PostMapping("/like")
     public ResponseEntity<LikeResponseDto> toggleLike(
             @RequestParam Long userId,
@@ -29,18 +27,14 @@ public class LikeController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 내가 받은 총 좋아요 수 조회 API
-     */
+    // 총 좋아요 수 조회
     @GetMapping("/likes/total")
     public ResponseEntity<Integer> getTotalLikes(@RequestParam Long userId) {
         int totalLikes = likeService.getTotalLikes(userId);
         return ResponseEntity.ok(totalLikes);
     }
 
-    /**
-     * 내가 쓴 게시글별 좋아요 수 목록 조회 API
-     */
+    // 각 게시글 좋아요 수 조회
     @GetMapping("/likes/posts")
     public ResponseEntity<List<PostLikeInfoDto>> getPostLikeInfos(@RequestParam Long userId) {
         List<PostLikeInfoDto> postLikeInfos = likeService.getMyPostLikeInfo(userId);

@@ -33,7 +33,7 @@ public class PostController {
         PostResponseDto response = postService.createPost(
                 requestDto.getTitle(),
                 requestDto.getContent(),
-                requestDto.getTags(),
+                String.valueOf(requestDto.getTags()),
                 images,
                 requestDto.getUserId()
         );

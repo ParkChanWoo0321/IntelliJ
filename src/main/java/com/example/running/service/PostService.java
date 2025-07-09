@@ -16,9 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +29,20 @@ public class PostService {
     private final TagRepository tagRepository;
     private final FileStorageService fileStorageService;
 
+    // 게시글 DTO 변환 (중복 제거)
+    private PostResponseDto convertToDto(Post post) {
+        return new PostResponseDto(
+                post.getPostId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getCreatedAt().toString(),
+                post.getImages().stream().map(PostImage::getImageUrl).collect(Collectors.toList()),
+                post.getTags().stream().map(Tag::getName).collect(Collectors.toList()),
+                post.getUser().getUserId(),
+                post.getUser().getNickname()
+        );
+    }
+
     // 내 게시글 조회
     @Transactional(readOnly = true)
     public List<PostResponseDto> getPostsByUserId(Long userId) {
@@ -38,22 +50,21 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         List<Post> posts = postRepository.findAllByUser(user);
+        return posts.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
 
-        return posts.stream()
-                .map(post -> new PostResponseDto(
-                        post.getPostId(),
-                        post.getTitle(),
-                        post.getContent(),
-                        post.getCreatedAt().toString(),
-                        post.getImages().stream().map(PostImage::getImageUrl).collect(Collectors.toList()),
-                        post.getTags().stream().map(Tag::getName).collect(Collectors.toList())
-                ))
+    // 태그 문자열 -> 리스트 변환
+    private List<String> parseTagString(String tags) {
+        if (tags == null || tags.isBlank()) return Collections.emptyList();
+        return Arrays.stream(tags.trim().split("\\s+"))
+                .map(tag -> tag.startsWith("#") ? tag.substring(1) : tag)
+                .filter(tag -> !tag.isBlank())
                 .collect(Collectors.toList());
     }
 
     // 게시글 작성
     @Transactional
-    public PostResponseDto createPost(String title, String content, List<String> tagNames,
+    public PostResponseDto createPost(String title, String content, String tags,
                                       MultipartFile[] images, Long userId) {
 
         User user = userRepository.findById(userId)
@@ -66,22 +77,12 @@ public class PostService {
         post.setUpdatedAt(LocalDateTime.now());
         post.setUser(user);
 
-        // 태그 처리
+        List<String> tagNames = parseTagString(tags);
         handleTags(post, tagNames);
-
         Post savedPost = postRepository.save(post);
 
-        // 이미지 처리
-        List<String> imageUrls = handleImages(savedPost, images);
-
-        return new PostResponseDto(
-                savedPost.getPostId(),
-                savedPost.getTitle(),
-                savedPost.getContent(),
-                savedPost.getCreatedAt().toString(),
-                imageUrls,
-                tagNames != null ? tagNames : new ArrayList<>()
-        );
+        handleImages(savedPost, images);
+        return convertToDto(savedPost);
     }
 
     // 게시글 수정
@@ -94,39 +95,20 @@ public class PostService {
         post.setContent(updateRequestDto.getContent());
         post.setUpdatedAt(LocalDateTime.now());
 
-        // 태그 처리
-        handleTags(post, Collections.singletonList(updateRequestDto.getTags()));
+        List<String> tagNames = parseTagString(updateRequestDto.getTags());
+        handleTags(post, tagNames);
 
-        // 이미지 처리
-        List<String> imageUrls = handleImages(post, images);
-
+        handleImages(post, images);
         postRepository.save(post);
 
-        return new PostResponseDto(
-                post.getPostId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getCreatedAt().toString(),
-                imageUrls,
-                updateRequestDto.getTags() != null ? Collections.singletonList(updateRequestDto.getTags()) : new ArrayList<>()
-        );
+        return convertToDto(post);
     }
 
-    // 태그명으로 게시글 검색
+    // 태그로 게시글 검색
     @Transactional(readOnly = true)
     public List<PostResponseDto> getPostsByTagName(String tagName) {
         List<Post> posts = postRepository.findAllByTags_Name(tagName);
-
-        return posts.stream()
-                .map(post -> new PostResponseDto(
-                        post.getPostId(),
-                        post.getTitle(),
-                        post.getContent(),
-                        post.getCreatedAt().toString(),
-                        post.getImages().stream().map(PostImage::getImageUrl).collect(Collectors.toList()),
-                        post.getTags().stream().map(Tag::getName).collect(Collectors.toList())
-                ))
-                .collect(Collectors.toList());
+        return posts.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     // 게시글 삭제
@@ -134,57 +116,41 @@ public class PostService {
     public void deletePost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
-
-        // 연관된 이미지도 함께 삭제됨 (orphanRemoval = true)
-        postRepository.delete(post);
+        postRepository.delete(post); // 연관 이미지 삭제는 orphanRemoval=true 설정
     }
 
-    // 태그 처리 공통 메서드
+    // 태그 처리
     private void handleTags(Post post, List<String> tagNames) {
-        // 기존 태그 제거
         List<Tag> existingTags = new ArrayList<>(post.getTags());
-        for (Tag tag : existingTags) {
-            post.removeTag(tag);
-        }
+        for (Tag tag : existingTags) post.removeTag(tag);
 
-        // 새로운 태그 추가
         if (tagNames != null) {
             for (String tagName : tagNames) {
                 Tag tag = tagRepository.findByName(tagName)
-                        .orElseGet(() -> {
-                            Tag newTag = new Tag();
-                            newTag.setName(tagName);
-                            return tagRepository.save(newTag);
-                        });
+                        .orElseGet(() -> tagRepository.save(new Tag(tagName)));
                 post.addTag(tag);
             }
         }
     }
 
-    // 이미지 처리 공통 메서드
-    private List<String> handleImages(Post post, MultipartFile[] images) {
-        // 기존 이미지 삭제
+    // 이미지 처리
+    private void handleImages(Post post, MultipartFile[] images) {
         List<PostImage> existingImages = new ArrayList<>(post.getImages());
         for (PostImage image : existingImages) {
             post.removeImage(image);
             postImageRepository.delete(image);
         }
 
-        List<String> imageUrls = new ArrayList<>();
         if (images != null) {
             for (MultipartFile image : images) {
                 try {
                     String imageUrl = fileStorageService.uploadFile(image);
-                    PostImage postImage = new PostImage();
-                    postImage.setPost(post);
-                    postImage.setImageUrl(imageUrl);
+                    PostImage postImage = new PostImage(imageUrl,post);
                     postImageRepository.save(postImage);
-                    imageUrls.add(imageUrl);
                 } catch (Exception e) {
                     throw new RuntimeException("이미지 업로드 중 오류가 발생했습니다.", e);
                 }
             }
         }
-        return imageUrls;
     }
 }

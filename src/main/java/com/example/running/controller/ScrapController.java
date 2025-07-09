@@ -19,15 +19,14 @@ public class ScrapController {
         this.scrapService = scrapService;
     }
 
-    /**
-     * 스크랩 토글 (스크랩 또는 스크랩 취소)
-     */
+    // 글 스크랩 , 스크랩 취소
     @PostMapping
     public ResponseEntity<ScrapResponseDto> toggleScrap(@RequestBody ScrapRequestDto requestDto) {
         ScrapResponseDto responseDto = scrapService.toggleScrap(requestDto.getUserId(), requestDto.getPostId());
         return ResponseEntity.ok(responseDto);
     }
 
+    // 스크랩 글 목록 조회
     @GetMapping("/users/{userId}/scraps")
     public ResponseEntity<List<ScrapPostDto>> getScrapList(@PathVariable Long userId) {
         List<ScrapPostDto> scrapList = scrapService.getScrapList(userId);

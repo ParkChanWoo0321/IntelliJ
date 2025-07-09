@@ -1,10 +1,14 @@
 package com.example.running.service;
 
 import com.example.running.dto.LoginRequestDto;
+import com.example.running.dto.LoginResponseDto;
 import com.example.running.dto.SignupRequestDto;
+import com.example.running.dto.UserResponseDto;
 import com.example.running.entity.User;
 import com.example.running.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,5 +49,23 @@ public class AuthService {
         badgeService.checkAndAssignBadge(savedUser, 0);
 
         return savedUser;
+    }
+
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+    }
+    public ResponseEntity<?> checkUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return ResponseEntity.ok(new LoginResponseDto(user));
+    }
+
+    public UserResponseDto getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return new UserResponseDto(user.getUsername(), user.getNickname());
     }
 }

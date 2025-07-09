@@ -20,13 +20,13 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final UserRepository userRepository;  // UserService 대신 직접 사용
 
-    // [1] SSE 연결
+    // SSE 연결
     @GetMapping("/subscribe")
     public SseEmitter subscribe(@RequestParam Long userId) {
         return sseService.subscribe(userId);
     }
 
-    // [2] 알림 목록 조회
+    // 알림 목록 조회
     @GetMapping
     public List<NotificationResponseDto> getAll(@RequestParam Long userId) {
         User user = userRepository.findById(userId)

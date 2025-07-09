@@ -16,7 +16,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    // 댓글 생성
+    // 댓글 작성
     @PostMapping("/{postId}")
     public ResponseEntity<CommonResponse<CommentResponseDto>> postComment(
             @PathVariable Long postId,
