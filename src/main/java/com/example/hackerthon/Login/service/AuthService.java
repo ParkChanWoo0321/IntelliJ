@@ -66,6 +66,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .email(dto.getEmail())
                 .nickname(dto.getNickname())
+                .provider("LOCAL")
                 .role(User.Role.USER)
                 .build();
 

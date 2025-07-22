@@ -34,6 +34,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 자체 인증, OAuth2 시작 및 콜백 경로 모두 공개
                         .requestMatchers(
+                                "/ws-notify",
+                                "/ws-notify/**",
                                 "/api/auth/**",
                                 "/api/oauth/**",
                                 "/oauth2/authorization/**",

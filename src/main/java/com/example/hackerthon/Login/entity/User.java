@@ -35,7 +35,7 @@ public class User {
     private String profileImageUrl;//= "/profile_uploads/default_profile.png";
     // 기본 프사 적용 하는법
     // static에 기본 이미지 파일 추가
-    //static/profile_uploads/default_profile.png
+    // static/profile_uploads/default_profile.png
 
     @Column(nullable = false)
     private String provider;
