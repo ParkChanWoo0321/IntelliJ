@@ -17,9 +17,20 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
-    // ✅ 글 작성 (사진/동영상 첨부 지원)
+    // JSON 형식 글 작성 (파일 없음)
+    @PostMapping(consumes = {"application/json"})
+    public ResponseEntity<String> createPostJson(
+            @RequestBody PostRequest postRequest,
+            Authentication authentication
+    ) throws IOException {
+        String username = authentication.getName();
+        postService.createPost(postRequest, null, username);
+        return ResponseEntity.ok("작성 완료");
+    }
+
+    // multipart/form-data 형식 글 작성 (파일 첨부 가능)
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<String> createPost(
+    public ResponseEntity<String> createPostMultipart(
             @RequestPart("postRequest") PostRequest postRequest,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             Authentication authentication
@@ -29,9 +40,21 @@ public class PostController {
         return ResponseEntity.ok("작성 완료");
     }
 
-    // ✅ 글 수정 (사진/동영상 첨부 지원)
+    // JSON 형식 글 수정 (파일 없음)
+    @PutMapping(value = "/{id}", consumes = {"application/json"})
+    public ResponseEntity<String> updatePostJson(
+            @PathVariable Long id,
+            @RequestBody PostRequest postRequest,
+            Authentication authentication
+    ) throws IOException {
+        String username = authentication.getName();
+        postService.updatePost(id, postRequest, null, username);
+        return ResponseEntity.ok("수정 완료");
+    }
+
+    // multipart/form-data 형식 글 수정 (파일 첨부 가능)
     @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
-    public ResponseEntity<String> updatePost(
+    public ResponseEntity<String> updatePostMultipart(
             @PathVariable Long id,
             @RequestPart("postRequest") PostRequest postRequest,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
