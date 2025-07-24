@@ -1,5 +1,5 @@
 package com.example.hackerthon.Login.dto;
-import com.example.hackerthon.post.community.dto.PostResponse;
+import com.example.hackerthon.community.post.dto.PostResponse;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.List;

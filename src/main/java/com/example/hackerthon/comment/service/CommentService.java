@@ -7,8 +7,8 @@ import com.example.hackerthon.comment.entity.Comment;
 import com.example.hackerthon.comment.dto.CommentRequestDto;
 import com.example.hackerthon.comment.dto.CommentResponseDto;
 import com.example.hackerthon.comment.repository.CommentRepository;
-import com.example.hackerthon.post.community.entity.Post;
-import com.example.hackerthon.post.community.repository.PostRepository;
+import com.example.hackerthon.community.post.entity.Post;
+import com.example.hackerthon.community.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service

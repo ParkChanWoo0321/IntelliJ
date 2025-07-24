@@ -2,7 +2,7 @@ package com.example.hackerthon.comment.repository;
 
 import com.example.hackerthon.Login.entity.User;
 import com.example.hackerthon.comment.entity.Comment;
-import com.example.hackerthon.post.community.entity.Post;
+import com.example.hackerthon.community.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

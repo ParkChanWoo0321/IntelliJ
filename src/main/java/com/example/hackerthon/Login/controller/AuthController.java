@@ -6,7 +6,7 @@ import com.example.hackerthon.Login.password.PasswordResetChangeDto;
 import com.example.hackerthon.Login.password.PasswordResetRequestDto;
 import com.example.hackerthon.Login.password.PasswordResetVerifyDto;
 import com.example.hackerthon.Login.service.AuthService;
-import com.example.hackerthon.post.community.dto.PostResponse;
+import com.example.hackerthon.community.post.dto.PostResponse;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

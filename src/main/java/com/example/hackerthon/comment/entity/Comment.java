@@ -1,7 +1,7 @@
 package com.example.hackerthon.comment.entity;
 
 import com.example.hackerthon.Login.entity.User;
-import com.example.hackerthon.post.community.entity.Post;
+import com.example.hackerthon.community.post.entity.Post;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
