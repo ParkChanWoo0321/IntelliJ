@@ -1,7 +1,6 @@
 package org.example.simplememo.service;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.example.simplememo.dto.LoginRequestDto;
 import org.example.simplememo.entity.User;
 import org.example.simplememo.repository.UserRepository;

@@ -1,11 +1,9 @@
 package org.example.simplememo.controller;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import org.example.simplememo.CommonResponse;
 import org.example.simplememo.dto.CommentRequestDto;
 import org.example.simplememo.dto.CommentResponseDto;
-import org.example.simplememo.dto.MemoResponseDto;
 import org.example.simplememo.entity.Comment;
 import org.example.simplememo.service.CommentService;
 import org.springframework.http.ResponseEntity;

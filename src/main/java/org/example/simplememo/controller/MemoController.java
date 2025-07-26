@@ -1,5 +1,7 @@
 package org.example.simplememo.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.example.simplememo.CommonResponse;
 import org.example.simplememo.dto.MemoRequestDto;
@@ -12,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Tag(name= "Memo", description = "메모 관련 API")
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/memo") //모든 메모 API의 기본 URL
@@ -23,6 +25,7 @@ public class MemoController {
      * @param request 생성할 메모의 내용
      * @return 생성된 메모
      */
+    @Operation(summary = "메모 작성",description = "메모를 작성합니다.")
     @PostMapping
     public ResponseEntity<CommonResponse<MemoResponseDto>> memoCreate(@RequestBody MemoRequestDto request) {
         Memo memo = memoService.createMemo(request);

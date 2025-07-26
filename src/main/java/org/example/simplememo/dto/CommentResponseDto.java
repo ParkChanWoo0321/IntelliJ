@@ -3,7 +3,6 @@ package org.example.simplememo.dto;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.simplememo.entity.Comment;
-import org.example.simplememo.entity.Memo;
 
 @Getter
 @Setter

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.example.simplememo.dto.MemoRequestDto;
 import org.example.simplememo.entity.Memo;
 import org.example.simplememo.repository.MemoRepository;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

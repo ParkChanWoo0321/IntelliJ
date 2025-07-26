@@ -4,7 +4,6 @@ package org.example.simplememo.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.example.simplememo.CommonResponse;
 import org.example.simplememo.dto.LoginRequestDto;
 import org.example.simplememo.dto.LoginResponseDto;

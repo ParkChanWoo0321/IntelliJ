@@ -1,7 +1,6 @@
 package org.example.simplememo.service;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.example.simplememo.dto.CommentRequestDto;
 import org.example.simplememo.entity.Comment;
 import org.example.simplememo.entity.Memo;
