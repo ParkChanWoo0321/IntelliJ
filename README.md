@@ -1,265 +1,350 @@
+# 🌐 패시팅 커널 게시판 백엔드 API 명세서
 
-# 🛡️ Hackerthon Spring Boot API Server
-
-Spring Boot 기반의 커뮤니티 서비스 백엔드 API 서버입니다.  
-JWT 기반 인증 및 로그인 유지 기능, 댓글/대댓글, 게시글 좋아요/스크랩, 알림, 비밀번호 찾기 등 다양한 기능을 제공합니다.
+Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, Google), 댓글/대댓글, 좋아요/스크랩, 로그인 유지 기능이 포함된 백엔드 시스템입니다.
 
 ---
 
-## 🔐 인증(Authentication)
+## 🔐 인증 및 회원 기능
 
-### 1. 회원가입
+### ✅ 회원가입 `POST /api/auth/signup`
 
-- **URL:** `/api/auth/signup`
-- **Method:** `POST`
-- **RequestBody:**
+**Request**
 
 ```json
 {
-  "username": "string",
-  "password": "string",
-  "email": "string",
-  "nickname": "string"
+  "username": "testuser",
+  "password": "Test1234!",
+  "email": "test@example.com",
+  "nickname": "다음달"
 }
 ```
 
-- **Response:**
-  - 200 OK : `"회원가입 성공"`
-  - 400 BAD REQUEST : `"에러 메시지"`
+**Response**
+
+```
+200 OK
+"회원가입 성공"
+```
 
 ---
 
-### 2. 로그인
+### ✅ 로그인 `POST /api/auth/login`
 
-- **URL:** `/api/auth/login`
-- **Method:** `POST`
-- **RequestBody:**
+**Request**
 
 ```json
 {
-  "username": "string",
-  "password": "string"
+  "username": "testuser",
+  "password": "Test1234!"
 }
 ```
 
-- **Response:**
+**Response**
 
 ```json
 {
-  "accessToken": "string",
-  "refreshToken": "string",
-  "username": "string",
+  "accessToken": "xxx.yyy.zzz",
+  "refreshToken": "aaa.bbb.ccc",
+  "username": "testuser",
   "role": "USER"
 }
 ```
 
 ---
 
-### 3. 로그아웃
+### 🔄 로그인 유지 (Access Token 재발급) `POST /api/auth/reissue`
 
-- **URL:** `/api/auth/logout`
-- **Method:** `POST`
-- **Header:** `Authorization: Bearer {accessToken}`
-
-- **Response:** `"로그아웃 성공"`
-
----
-
-### 4. 로그인 유지 (Refresh Token 재발급)
-
-- **URL:** `/api/auth/refresh`
-- **Method:** `POST`
-- **Header:** `Authorization: Bearer {refreshToken}`
-
-- **Response:**
+**Request**
 
 ```json
 {
-  "accessToken": "string"
+  "refreshToken": "aaa.bbb.ccc"
+}
+```
+
+**Response**
+
+```json
+{
+  "accessToken": "new-access-token",
+  "refreshToken": "new-refresh-token"
 }
 ```
 
 ---
 
-### 5. 내 정보 조회
+### 🔓 로그아웃 `POST /api/auth/logout`
 
-- **URL:** `/api/auth/me`
-- **Method:** `GET`
-- **Header:** `Authorization: Bearer {accessToken}`
+* `Authorization: Bearer <accessToken>`
 
-- **Response:** 유저 정보 + 내가 쓴 글/스크랩/좋아요/댓글단 게시글 목록
+**Response**
 
----
-
-### 6. 프로필 이미지 변경
-
-- **URL:** `/api/auth/profile-image`
-- **Method:** `POST`
-- **Header:** `Authorization: Bearer {accessToken}`
-- **Body:** `multipart/form-data (file)`
-
-- **Response:** `"프로필 사진이 변경되었습니다."`
+```
+200 OK
+"로그아웃 성공"
+```
 
 ---
 
-### 7. 프로필 이미지 삭제
+### 🗑 회원 탈퇴 `DELETE /api/auth/withdraw`
 
-- **URL:** `/api/auth/profile-image`
-- **Method:** `DELETE`
+* 헤더: `Authorization: Bearer accessToken`
 
-- **Response:** `"프로필 사진이 기본 이미지로 변경되었습니다."`
+**Response**
+
+```
+200 OK
+"회원 탈퇴가 완료되었습니다."
+```
 
 ---
 
-### 8. 비밀번호 변경
+## 👤 사용자 정보
 
-- **URL:** `/api/auth/change-password`
-- **Method:** `POST`
+### 🙋 내 정보 조회 `GET /api/auth/me`
+
+**Response**
 
 ```json
 {
-  "currentPassword": "string",
-  "newPassword": "string"
+  "username": "testuser",
+  "email": "test@example.com",
+  "nickname": "다음달",
+  "role": "USER",
+  "profileImageUrl": "/profile_uploads/profile.png",
+  "myPosts": [...],
+  "myScraps": [...],
+  "myLikes": [...],
+  "myCommentedPosts": [...]
+}
+```
+
+* `myPosts`, `myScraps`, `myLikes`, `myCommentedPosts`: `PostResponse` 구조
+
+```json
+{
+  "postId": 1,
+  "title": "제목",
+  "author": "닉네임",
+  "likeCount": 5,
+  "scrapCount": 2,
+  "commentCount": 4,
+  "mediaList": [
+    {
+      "url": "/uploads/image1.jpg",
+      "type": "IMAGE"
+    }
+  ]
 }
 ```
 
 ---
 
-### 9. 비밀번호 재설정 (이메일 인증 방식)
+## 🔐 비밀번호 재설정 (이메일 인증 기반)
 
-#### 9-1. 인증번호 요청
-
-- **URL:** `/api/auth/password-reset/request`
-- **Method:** `POST`
+### 1️⃣ 인증 코드 요청 `POST /api/auth/password-reset/request`
 
 ```json
 {
-  "email": "string"
+  "email": "test@example.com"
 }
 ```
 
-#### 9-2. 인증번호 검증
+**Response**
 
-- **URL:** `/api/auth/password-reset/verify`
-- **Method:** `POST`
+```
+200 OK
+"비밀번호 재설정 인증번호를 이메일로 발송했습니다."
+```
+
+---
+
+### 2️⃣ 인증 코드 확인 `POST /api/auth/password-reset/verify`
 
 ```json
 {
-  "email": "string",
+  "email": "test@example.com",
   "code": "123456"
 }
 ```
 
-#### 9-3. 비밀번호 재설정
+**Response**
+
+```
+200 OK
+"인증번호가 유효합니다."
+```
+
+---
+
+### 3️⃣ 새 비밀번호 설정 `POST /api/auth/password-reset/change`
 
 ```json
 {
-  "email": "string",
-  "newPassword": "string"
+  "email": "test@example.com",
+  "newPassword": "NewPass123!"
+}
+```
+
+**Response**
+
+```
+200 OK
+"비밀번호가 변경되었습니다."
+```
+
+---
+
+### 🔒 내 정보에서 비밀번호 변경 `POST /api/auth/change-password`
+
+```json
+{
+  "currentPassword": "OldPass123!",
+  "newPassword": "NewPass123!"
+}
+```
+
+**Response**
+
+```
+200 OK
+"비밀번호가 변경되었습니다."
+```
+
+---
+
+## 🖼 프로필 & 닉네임
+
+### 🖼 프로필 이미지 업로드 `POST /api/auth/profile-image`
+
+* `multipart/form-data`
+* 필드명: `file`
+
+**Response**
+
+```
+200 OK
+"프로필 사진이 변경되었습니다."
+```
+
+---
+
+### ❌ 프로필 이미지 삭제 `DELETE /api/auth/profile-image`
+
+**Response**
+
+```
+200 OK
+"프로필 사진이 기본 이미지로 변경되었습니다."
+```
+
+---
+
+### 🧑‍💼 닉네임 변경 `POST /api/auth/update-nickname`
+
+```json
+{
+  "nickname": "새닉네임"
+}
+```
+
+**Response**
+
+```
+200 OK
+"닉네임이 변경되었습니다."
+```
+
+---
+
+### 🧪 닉네임 중복 확인 `GET /api/auth/nickname-check?nickname=새닉네임`
+
+**Response**
+
+```json
+true 또는 false
+```
+
+---
+
+## 📝 게시글 / 댓글 / 좋아요 / 스크랩
+
+### 💬 내가 댓글 단 게시글 조회 `GET /api/auth/my-comments/posts`
+
+**Response**
+
+* `List<PostResponse>`
+
+---
+
+## 💬 대댓글 기능
+
+### ✏️ 대댓글 수정 `PUT /api/comments/replies/{replyId}`
+
+```json
+{
+  "content": "수정된 대댓글입니다"
+}
+```
+
+### ❌ 대댓글 삭제 `DELETE /api/comments/replies/{replyId}`
+
+---
+
+## 🌐 소셜 로그인
+
+### 지원 플랫폼
+
+* Google
+* Kakao
+* Naver
+
+### OAuth2 엔드포인트
+
+```http
+GET /oauth2/authorization/google
+GET /oauth2/authorization/kakao
+GET /oauth2/authorization/naver
+```
+
+**Response 예시**
+
+```json
+{
+  "accessToken": "...",
+  "refreshToken": "...",
+  "username": "testuser",
+  "role": "USER"
 }
 ```
 
 ---
 
-### 10. 닉네임 변경
+## ⚙️ 환경 변수 설정
 
-- **URL:** `/api/auth/update-nickname`
-- **Method:** `POST`
-
-```json
-{
-  "nickname": "newNickname"
-}
+```properties
+jwt.secret=your-secret-key
+spring.mail.username=youremail@gmail.com
+spring.mail.password=application-specific-password
 ```
 
 ---
 
-### 11. 닉네임 중복 체크
+## ✅ 보안 및 특이사항 요약
 
-- **URL:** `/api/auth/nickname-check?nickname=newNickname`
-- **Method:** `GET`
-
----
-
-### 12. 내가 댓글 단 게시글 목록
-
-- **URL:** `/api/auth/my-comments/posts`
-- **Method:** `GET`
-
----
-
-### 13. 회원 탈퇴
-
-- **URL:** `/api/auth/withdraw`
-- **Method:** `DELETE`
+* AccessToken + RefreshToken 조합 기반 인증
+* RefreshToken 기반 자동 로그인
+* 로그아웃 시 AccessToken 블랙리스트 처리
+* 프로필 이미지 업로드 및 삭제
+* 닉네임 중복 확인/변경
+* 댓글 단 게시글 조회
+* 내가 좋아요, 스크랩한 게시글 포함
+* 대댓글 수정/삭제 기능 포함
+* 소셜 로그인 연동 (Kakao, Naver, Google)
+* 비밀번호 재설정 이메일 인증 및 내 정보에서 변경 지원
 
 ---
 
-## 💬 댓글 기능
+🎉 **모든 기능 완벽 구현 완료!**
 
-### 1. 댓글 작성
-
-- **URL:** `/api/comments/{postId}`
-- **Method:** `POST`
-
-```json
-{
-  "content": "string"
-}
-```
-
-### 2. 대댓글 작성
-
-- **URL:** `/api/comments/{postId}/{parentId}`
-- **Method:** `POST`
-
-```json
-{
-  "content": "string"
-}
-```
-
-### 3. 댓글 수정
-
-- **URL:** `/api/comments/{commentId}`
-- **Method:** `PUT`
-
-```json
-{
-  "content": "updated content"
-}
-```
-
-### 4. 댓글 삭제
-
-- **URL:** `/api/comments/{commentId}`
-- **Method:** `DELETE`
-
----
-
-## 🛠️ 기술 스택
-
-- Spring Boot 3
-- Spring Security + JWT
-- JPA + H2/MySQL
-- Lombok / Validation / Multipart
-- Mail API (비밀번호 찾기)
-
----
-
-## 🔐 로그인 유지 전략
-
-- AccessToken: 1시간 유효
-- RefreshToken: 7일 유효
-- Refresh 요청 시 새 AccessToken 발급
-- Logout 및 회원탈퇴 시 토큰 블랙리스트에 등록하여 무효화
-
----
-
-## ✅ 기타 기능
-
-- 비밀번호 규칙 유효성 검사
-- 중복 아이디/이메일/닉네임 검사
-- 기본 프로필 이미지 제공
-- 내가 댓글 단 게시글 목록 조회
-- 커뮤니티 기능(게시글, 댓글, 좋아요, 스크랩)
+이 문서는 GitHub `README.md`에 바로 복사하여 사용 가능합니다.
