@@ -1,4 +1,4 @@
-# 🌐 패시팅 커널 게시판 백엔드 API 명세서
+# 🌐 패시팅 캠론 게시판 백엔드 API 메시지
 
 Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, Google), 댓글/대댓글, 좋아요/스크랩, 로그인 유지 기능이 포함된 백엔드 시스템입니다.
 
@@ -21,9 +21,10 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"회원가입 성공"
+```json
+{
+  "message": "회원가입 성공"
+}
 ```
 
 ---
@@ -79,9 +80,10 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"로그아웃 성공"
+```json
+{
+  "message": "로그아웃 성공"
+}
 ```
 
 ---
@@ -92,9 +94,10 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"회원 탈퇴가 완료되었습니다."
+```json
+{
+  "message": "회원 탈퇴가 완료되었습니다."
+}
 ```
 
 ---
@@ -119,30 +122,11 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 }
 ```
 
-* `myPosts`, `myScraps`, `myLikes`, `myCommentedPosts`: `PostResponse` 구조
-
-```json
-{
-  "postId": 1,
-  "title": "제목",
-  "author": "닉네임",
-  "likeCount": 5,
-  "scrapCount": 2,
-  "commentCount": 4,
-  "mediaList": [
-    {
-      "url": "/uploads/image1.jpg",
-      "type": "IMAGE"
-    }
-  ]
-}
-```
-
 ---
 
-## 🔐 비밀번호 재설정 (이메일 인증 기반)
+## 🔐 비밀번호 재설정 (이메일 인증 기능)
 
-### 1️⃣ 인증 코드 요청 `POST /api/auth/password-reset/request`
+### 1⃣️ 인증 코드 요청 `POST /api/auth/password-reset/request`
 
 ```json
 {
@@ -152,14 +136,15 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"비밀번호 재설정 인증번호를 이메일로 발송했습니다."
+```json
+{
+  "message": "비밀번호 재설정 인증번호를 이메일로 발송했습니다."
+}
 ```
 
 ---
 
-### 2️⃣ 인증 코드 확인 `POST /api/auth/password-reset/verify`
+### 2⃣️ 인증 코드 확인 `POST /api/auth/password-reset/verify`
 
 ```json
 {
@@ -170,14 +155,15 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"인증번호가 유효합니다."
+```json
+{
+  "message": "인증번호가 유효합니다."
+}
 ```
 
 ---
 
-### 3️⃣ 새 비밀번호 설정 `POST /api/auth/password-reset/change`
+### 3⃣️ 새 비밀번호 설정 `POST /api/auth/password-reset/change`
 
 ```json
 {
@@ -188,14 +174,15 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"비밀번호가 변경되었습니다."
+```json
+{
+  "message": "비밀번호가 변경되었습니다."
+}
 ```
 
 ---
 
-### 🔒 내 정보에서 비밀번호 변경 `POST /api/auth/change-password`
+### 🔐 내 정보에서 비밀번호 변경 `POST /api/auth/change-password`
 
 ```json
 {
@@ -206,9 +193,10 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"비밀번호가 변경되었습니다."
+```json
+{
+  "message": "비밀번호가 변경되었습니다."
+}
 ```
 
 ---
@@ -222,9 +210,10 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"프로필 사진이 변경되었습니다."
+```json
+{
+  "message": "프로필 사진이 변경되었습니다."
+}
 ```
 
 ---
@@ -233,14 +222,15 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"프로필 사진이 기본 이미지로 변경되었습니다."
+```json
+{
+  "message": "프로필 사진이 기본 이미지로 변경되었습니다."
+}
 ```
 
 ---
 
-### 🧑‍💼 닉네임 변경 `POST /api/auth/update-nickname`
+### 🧑 닉네임 변경 `POST /api/auth/update-nickname`
 
 ```json
 {
@@ -250,101 +240,231 @@ Spring Boot 기반 JWT 인증, 이메일 인증, 소셜 로그인(Kakao, Naver, 
 
 **Response**
 
-```
-200 OK
-"닉네임이 변경되었습니다."
+```json
+{
+  "message": "닉네임이 변경되었습니다."
+}
 ```
 
 ---
 
-### 🧪 닉네임 중복 확인 `GET /api/auth/nickname-check?nickname=새닉네임`
+### 🧚 닉네임 중복 확인 `GET /api/auth/nickname-check?nickname=새닉네임`
 
 **Response**
 
 ```json
-true 또는 false
+true
+```
+
+또는
+
+```json
+false
 ```
 
 ---
 
 ## 📝 게시글 / 댓글 / 좋아요 / 스크랩
 
-### 💬 내가 댓글 단 게시글 조회 `GET /api/auth/my-comments/posts`
+### 📌 게시글 등록 `POST /api/posts`
+
+```json
+{
+  "title": "게시글 제목",
+  "content": "내용"
+}
+```
 
 **Response**
 
-* `List<PostResponse>`
-
----
-
-## 💬 대댓글 기능
-
-### ✏️ 대댓글 수정 `PUT /api/comments/replies/{replyId}`
-
 ```json
 {
-  "content": "수정된 대댓글입니다"
-}
-```
-
-### ❌ 대댓글 삭제 `DELETE /api/comments/replies/{replyId}`
-
----
-
-## 🌐 소셜 로그인
-
-### 지원 플랫폼
-
-* Google
-* Kakao
-* Naver
-
-### OAuth2 엔드포인트
-
-```http
-GET /oauth2/authorization/google
-GET /oauth2/authorization/kakao
-GET /oauth2/authorization/naver
-```
-
-**Response 예시**
-
-```json
-{
-  "accessToken": "...",
-  "refreshToken": "...",
-  "username": "testuser",
-  "role": "USER"
+  "id": 1,
+  "title": "게시글 제목",
+  "content": "내용",
+  "author": "nickname",
+  "createdAt": "2024-07-01T00:00:00"
 }
 ```
 
 ---
 
-## ⚙️ 환경 변수 설정
+### ✏️ 게시글 수정 `PUT /api/posts/{postId}`
 
-```properties
-jwt.secret=your-secret-key
-spring.mail.username=youremail@gmail.com
-spring.mail.password=application-specific-password
+```json
+{
+  "title": "수정된 제목",
+  "content": "수정된 내용"
+}
+```
+
+**Response**
+
+```json
+{
+  "message": "게시글이 수정되었습니다."
+}
 ```
 
 ---
 
-## ✅ 보안 및 특이사항 요약
+### ❌ 게시글 삭제 `DELETE /api/posts/{postId}`
 
-* AccessToken + RefreshToken 조합 기반 인증
-* RefreshToken 기반 자동 로그인
-* 로그아웃 시 AccessToken 블랙리스트 처리
-* 프로필 이미지 업로드 및 삭제
-* 닉네임 중복 확인/변경
-* 댓글 단 게시글 조회
-* 내가 좋아요, 스크랩한 게시글 포함
-* 대댓글 수정/삭제 기능 포함
-* 소셜 로그인 연동 (Kakao, Naver, Google)
-* 비밀번호 재설정 이메일 인증 및 내 정보에서 변경 지원
+**Response**
+
+```json
+{
+  "message": "게시글이 삭제되었습니다."
+}
+```
 
 ---
 
-🎉 **모든 기능 완벽 구현 완료!**
+### 🔍 게시글 검색 `GET /api/posts?keyword=keyword&page=0`
 
-이 문서는 GitHub `README.md`에 바로 복사하여 사용 가능합니다.
+**Response**
+
+```json
+[PostResponse...]
+```
+
+---
+
+### 📌 게시글 조회 `GET /api/posts/{postId}`
+
+**Response**
+
+```json
+{
+  "id": 1,
+  "title": "게시글 제목",
+  "content": "내용",
+  "author": "nickname",
+  "createdAt": "2024-07-01T00:00:00",
+  "likeCount": 10,
+  "scrapCount": 3,
+  "commentCount": 5,
+  "mediaList": [ { "url": "...", "type": "IMAGE" } ]
+}
+```
+
+---
+
+### 📌 좋아요한 게시글 조회 `GET /api/posts/liked`
+
+**Response**
+
+```json
+[PostResponse...]
+```
+
+---
+
+### 📌 스크랩한 게시글 조회 `GET /api/posts/scrapped`
+
+**Response**
+
+```json
+[PostResponse...]
+```
+
+---
+
+### 👍 좋아요 `POST /api/posts/{postId}/like`
+
+**Response**
+
+```json
+{
+  "message": "게시글에 좋아요를 눌렀습니다."
+}
+```
+
+---
+
+### ⭐ 스크랩 `POST /api/posts/{postId}/scrap`
+
+**Response**
+
+```json
+{
+  "message": "게시글을 스크랩했습니다."
+}
+```
+
+---
+
+## 💬 댓글 / 대댓글
+
+### 💬 댓글 등록 `POST /api/comments`
+
+```json
+{
+  "content": "댓글 내용",
+  "parentId": null
+}
+```
+
+### 💬 대댓글 등록 `POST /api/comments`
+
+```json
+{
+  "content": "대댓글 내용",
+  "parentId": 5
+}
+```
+
+### ✏️ 댓글/대댓글 수정 `PUT /api/comments/{commentId}`
+
+```json
+{
+  "content": "수정된 내용"
+}
+```
+
+**Response**
+
+```json
+{
+  "message": "댓글이 수정되었습니다."
+}
+```
+
+---
+
+### ❌ 댓글/대댓글 삭제 `DELETE /api/comments/{commentId}`
+
+**Response**
+
+```json
+{
+  "message": "댓글이 삭제되었습니다."
+}
+```
+
+---
+
+### 📌 댓글 조회 `GET /api/posts/{postId}/comments`
+
+**Response**
+
+```json
+[CommentResponseDto...]
+```
+
+---
+
+## 🔗 소셜 로그인
+
+### 🔑 카카오 로그인 `GET /oauth2/authorization/kakao`
+
+### 🔑 네이버 로그인 `GET /oauth2/authorization/naver`
+
+### 🔑 구글 로그인 `GET /oauth2/authorization/google`
+
+* 로그인 후 Redirect URI에 따라 JWT 발급
+* AccessToken, RefreshToken 발급 포함
+
+---
+
+이 문서는 지속적으로 업데이트됩니다. 🚀
