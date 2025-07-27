@@ -1,407 +1,265 @@
-# 📘 Hackerthon Spring Boot Backend API
 
-**JWT 기반 인증/인가, Refresh 토큰(로그인 유지), 게시글/댓글/좋아요/스크랩/회원 등 전 기능**
+# 🛡️ Hackerthon Spring Boot API Server
+
+Spring Boot 기반의 커뮤니티 서비스 백엔드 API 서버입니다.  
+JWT 기반 인증 및 로그인 유지 기능, 댓글/대댓글, 게시글 좋아요/스크랩, 알림, 비밀번호 찾기 등 다양한 기능을 제공합니다.
 
 ---
 
-## 🔑 인증 & 사용자 (Auth API)
+## 🔐 인증(Authentication)
 
-### 회원가입  
-`POST /api/auth/signup`  
-새 유저 등록
+### 1. 회원가입
 
-**Request**
+- **URL:** `/api/auth/signup`
+- **Method:** `POST`
+- **RequestBody:**
+
 ```json
 {
-  "username": "user01",
-  "password": "Pass1234!",
-  "email": "user@example.com",
-  "nickname": "닉네임"
+  "username": "string",
+  "password": "string",
+  "email": "string",
+  "nickname": "string"
 }
-Response
+```
 
-복사
-편집
-회원가입 성공
-예외
+- **Response:**
+  - 200 OK : `"회원가입 성공"`
+  - 400 BAD REQUEST : `"에러 메시지"`
 
-아이디 중복: 이미 사용중인 아이디입니다.
+---
 
-이메일 중복: 이미 사용중인 이메일입니다.
+### 2. 로그인
 
-닉네임 중복: 이미 사용중인 닉네임입니다.
+- **URL:** `/api/auth/login`
+- **Method:** `POST`
+- **RequestBody:**
 
-비밀번호 정책: 비밀번호는 8자 이상, 영문/숫자/특수문자를 각각 1개 이상 포함해야 합니다.
-
-로그인 (JWT + Refresh)
-POST /api/auth/login
-로그인 및 토큰 2종 발급(로그인 유지 지원)
-
-Request
-
-json
-복사
-편집
+```json
 {
-  "username": "user01",
-  "password": "Pass1234!"
+  "username": "string",
+  "password": "string"
 }
-Response
+```
 
-json
-복사
-편집
+- **Response:**
+
+```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "username": "user01",
+  "accessToken": "string",
+  "refreshToken": "string",
+  "username": "string",
   "role": "USER"
 }
-비고
+```
 
-accessToken: 1시간, refreshToken: 7일
+---
 
-토큰은 header로 사용
-Authorization: Bearer {accessToken}
+### 3. 로그아웃
 
-AccessToken 재발급 (로그인 유지)
-POST /api/auth/refresh-token
-Request
+- **URL:** `/api/auth/logout`
+- **Method:** `POST`
+- **Header:** `Authorization: Bearer {accessToken}`
 
-json
-복사
-편집
+- **Response:** `"로그아웃 성공"`
+
+---
+
+### 4. 로그인 유지 (Refresh Token 재발급)
+
+- **URL:** `/api/auth/refresh`
+- **Method:** `POST`
+- **Header:** `Authorization: Bearer {refreshToken}`
+
+- **Response:**
+
+```json
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "accessToken": "string"
 }
-Response
+```
 
-json
-복사
-편집
+---
+
+### 5. 내 정보 조회
+
+- **URL:** `/api/auth/me`
+- **Method:** `GET`
+- **Header:** `Authorization: Bearer {accessToken}`
+
+- **Response:** 유저 정보 + 내가 쓴 글/스크랩/좋아요/댓글단 게시글 목록
+
+---
+
+### 6. 프로필 이미지 변경
+
+- **URL:** `/api/auth/profile-image`
+- **Method:** `POST`
+- **Header:** `Authorization: Bearer {accessToken}`
+- **Body:** `multipart/form-data (file)`
+
+- **Response:** `"프로필 사진이 변경되었습니다."`
+
+---
+
+### 7. 프로필 이미지 삭제
+
+- **URL:** `/api/auth/profile-image`
+- **Method:** `DELETE`
+
+- **Response:** `"프로필 사진이 기본 이미지로 변경되었습니다."`
+
+---
+
+### 8. 비밀번호 변경
+
+- **URL:** `/api/auth/change-password`
+- **Method:** `POST`
+
+```json
 {
-  "accessToken": "새로운 액세스토큰 문자열",
-  "refreshToken": "기존(혹은 새) 리프레시토큰"
+  "currentPassword": "string",
+  "newPassword": "string"
 }
-예외
+```
 
-만료/잘못된 리프레시 토큰: 401, 403 에러
+---
 
-로그아웃
-POST /api/auth/logout
-헤더
-Authorization: Bearer {accessToken}
+### 9. 비밀번호 재설정 (이메일 인증 방식)
 
-Response
+#### 9-1. 인증번호 요청
 
-복사
-편집
-로그아웃 성공
-내 정보 조회
-GET /api/auth/me
+- **URL:** `/api/auth/password-reset/request`
+- **Method:** `POST`
 
-Response
-
-json
-복사
-편집
+```json
 {
-  "username": "user01",
-  "email": "user@example.com",
-  "nickname": "닉네임",
-  "role": "USER",
-  "profileImageUrl": "/profile_uploads/default_profile.png",
-  "myPosts": [ { ...PostResponse } ],
-  "myLikes": [ { ...PostResponse } ],
-  "myScraps": [ { ...PostResponse } ],
-  "myCommentedPosts": [ { ...PostResponse } ]
+  "email": "string"
 }
-닉네임 변경
-POST /api/auth/update-nickname
+```
 
-json
-복사
-편집
-{ "nickname": "새닉네임" }
-Response
+#### 9-2. 인증번호 검증
 
-복사
-편집
-닉네임이 변경되었습니다.
-닉네임 중복 확인
-GET /api/auth/nickname-check?nickname=테스트
-Response: true(중복) / false(가능)
+- **URL:** `/api/auth/password-reset/verify`
+- **Method:** `POST`
 
-프로필 이미지 업로드/삭제
-업로드: POST /api/auth/profile-image (FormData: file)
-
-삭제: DELETE /api/auth/profile-image
-
-비밀번호 관리 & 찾기 (이메일 인증 3단계)
-인증번호 요청
-POST /api/auth/password-reset/request
-
-json
-복사
-편집
-{ "email": "user@example.com" }
-인증번호 검증
-POST /api/auth/password-reset/verify
-
-json
-복사
-편집
-{ "email": "user@example.com", "code": "123456" }
-새 비밀번호 설정
-POST /api/auth/password-reset/change
-
-json
-복사
-편집
-{ "email": "user@example.com", "newPassword": "새비번1!" }
-직접 비번 변경(로그인 상태)
-POST /api/auth/change-password
-
-json
-복사
-편집
-{ "currentPassword": "OldPass!", "newPassword": "NewPass1!" }
-회원 탈퇴
-DELETE /api/auth/withdraw
-Response
-
-복사
-편집
-회원 탈퇴가 완료되었습니다.
-내가 댓글 쓴 게시글
-GET /api/auth/my-comments/posts
-Response:
-[ { ...PostResponse } ]
-
-📝 게시글 API (/posts)
-게시글 등록
-JSON: POST /posts (Content-Type: application/json)
-
-Multipart(파일): POST /posts (Content-Type: multipart/form-data)
-
-Request(JSON)
-
-json
-복사
-편집
+```json
 {
-  "title": "제목",
-  "content": "본문"
+  "email": "string",
+  "code": "123456"
 }
-Request(Multipart)
+```
 
-css
-복사
-편집
-postRequest: { "title": "제목", "content": "본문" }
-files: [file1.jpg, ...]
-Response
+#### 9-3. 비밀번호 재설정
 
-복사
-편집
-작성 완료
-게시글 수정
-JSON: PUT /posts/{id} (application/json)
-
-Multipart: PUT /posts/{id} (multipart/form-data)
-
-Request
-
-json
-복사
-편집
+```json
 {
-  "title": "수정 제목",
-  "content": "수정 본문"
+  "email": "string",
+  "newPassword": "string"
 }
-Response
+```
 
-복사
-편집
-수정 완료
-게시글 삭제
-DELETE /posts/{id}
-Response
+---
 
-복사
-편집
-삭제 완료
-단일 게시글 조회
-GET /posts/{id}
-Response
+### 10. 닉네임 변경
 
-json
-복사
-편집
+- **URL:** `/api/auth/update-nickname`
+- **Method:** `POST`
+
+```json
 {
-  "id": 1,
-  "title": "테스트 제목",
-  "content": "본문",
-  "authorUsername": "user01",
-  "authorNickname": "닉네임",
-  "createdAt": "2025-07-27T10:00:00",
-  "updatedAt": "2025-07-27T10:15:00",
-  "mediaList": [
-    { "url": "/uploads/img.jpg", "type": "IMAGE" }
-  ],
-  "likeCount": 10,
-  "scrapCount": 2,
-  "commentCount": 5
+  "nickname": "newNickname"
 }
-전체 게시글 목록
-GET /posts
+```
 
-내 게시글 목록
-GET /posts/me
+---
 
-게시글 검색
-GET /posts/search?keyword=...
+### 11. 닉네임 중복 체크
 
-💬 댓글/대댓글 API (/posts/{postId}/comments)
-댓글/대댓글 등록
-POST /posts/{postId}/comments
+- **URL:** `/api/auth/nickname-check?nickname=newNickname`
+- **Method:** `GET`
 
-json
-복사
-편집
+---
+
+### 12. 내가 댓글 단 게시글 목록
+
+- **URL:** `/api/auth/my-comments/posts`
+- **Method:** `GET`
+
+---
+
+### 13. 회원 탈퇴
+
+- **URL:** `/api/auth/withdraw`
+- **Method:** `DELETE`
+
+---
+
+## 💬 댓글 기능
+
+### 1. 댓글 작성
+
+- **URL:** `/api/comments/{postId}`
+- **Method:** `POST`
+
+```json
 {
-  "content": "댓글 본문",
-  "parentId": null     // 대댓글이면 부모 댓글 ID
+  "content": "string"
 }
-Response
+```
 
-json
-복사
-편집
+### 2. 대댓글 작성
+
+- **URL:** `/api/comments/{postId}/{parentId}`
+- **Method:** `POST`
+
+```json
 {
-  "id": 1,
-  "content": "댓글 본문",
-  "author": "닉네임",
-  "createdAt": "2025-07-27T10:00:00",
-  "updatedAt": null,
-  "parentId": null,
-  "replies": []
+  "content": "string"
 }
-댓글/대댓글 수정
-PUT /posts/{postId}/comments/{commentId}
+```
 
-json
-복사
-편집
-{ "content": "수정된 내용" }
-Response
+### 3. 댓글 수정
 
-json
-복사
-편집
+- **URL:** `/api/comments/{commentId}`
+- **Method:** `PUT`
+
+```json
 {
-  "id": 1,
-  "content": "수정된 내용",
-  "author": "닉네임",
-  "createdAt": "2025-07-27T10:00:00",
-  "updatedAt": "2025-07-27T11:00:00",
-  "parentId": null,
-  "replies": []
+  "content": "updated content"
 }
-댓글/대댓글 삭제
-DELETE /posts/{postId}/comments/{commentId}
-Response: 200 OK
+```
 
-댓글/대댓글 트리 전체 조회
-GET /posts/{postId}/comments
+### 4. 댓글 삭제
 
-Response
+- **URL:** `/api/comments/{commentId}`
+- **Method:** `DELETE`
 
-json
-복사
-편집
-[
-  {
-    "id": 1,
-    "content": "댓글입니다",
-    "author": "user01",
-    "createdAt": "2025-07-27T10:00:00",
-    "updatedAt": "2025-07-27T10:30:00",
-    "parentId": null,
-    "replies": [
-      {
-        "id": 2,
-        "content": "대댓글입니다",
-        "author": "user02",
-        "createdAt": "2025-07-27T10:35:00",
-        "updatedAt": null,
-        "parentId": 1,
-        "replies": []
-      }
-    ]
-  }
-]
-❤️ 좋아요 API (/likes)
-좋아요 토글
-POST /likes/{postId}/toggle
+---
 
-Response
+## 🛠️ 기술 스택
 
-json
-복사
-편집
-{
-  "postId": 1,
-  "likeCount": 13,
-  "liked": true
-}
-내가 좋아요 누른 글
-GET /likes/mine
-Response: [ { ...PostResponse } ]
+- Spring Boot 3
+- Spring Security + JWT
+- JPA + H2/MySQL
+- Lombok / Validation / Multipart
+- Mail API (비밀번호 찾기)
 
-📌 스크랩 API (/scraps)
-스크랩 토글
-POST /scraps/{postId}/toggle
-Response
+---
 
-복사
-편집
-스크랩 완료
-또는
+## 🔐 로그인 유지 전략
 
-복사
-편집
-스크랩 취소
-내가 스크랩한 글
-GET /scraps/mine
-Response: [ { ...PostResponse } ]
+- AccessToken: 1시간 유효
+- RefreshToken: 7일 유효
+- Refresh 요청 시 새 AccessToken 발급
+- Logout 및 회원탈퇴 시 토큰 블랙리스트에 등록하여 무효화
 
-❗️ 공통 에러/권한 응답
-상황	상태코드	메시지
-로그인 실패	400	비밀번호가 틀렸습니다.
-중복 데이터	400	이미 사용중인 이메일입니다. 등
-권한 없음	403	본인만 수정 가능
-인증 없음	401	JWT 토큰 없음
+---
 
-🔒 JWT/Refresh 정책
-AccessToken: 1시간, 헤더로 인증, 권한 필요 API에 사용
+## ✅ 기타 기능
 
-RefreshToken: 7일, 로그인 유지(재발급 전용, 일반적으로 HttpOnly 쿠키 또는 클라이언트 저장)
-
-로그인 유지:
-
-RefreshToken으로 accessToken 갱신
-
-블랙리스트에 등록된 토큰은 무효
-
-로그아웃:
-
-AccessToken 블랙리스트에 등록(재사용 불가)
-
-💡 기타
-모든 요청은 Authorization: Bearer {accessToken} 헤더 필요 (로그인/회원가입/인증번호 요청 등 제외)
-
-미디어 파일은 /uploads/, 프로필 이미지는 /profile_uploads/ 디렉토리에 저장됨
-
-각 기능/로직별 알림/권한/데이터 정책은 코드와 동일하게 반영됨
-
+- 비밀번호 규칙 유효성 검사
+- 중복 아이디/이메일/닉네임 검사
+- 기본 프로필 이미지 제공
+- 내가 댓글 단 게시글 목록 조회
+- 커뮤니티 기능(게시글, 댓글, 좋아요, 스크랩)
