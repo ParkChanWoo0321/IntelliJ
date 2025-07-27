@@ -73,7 +73,6 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    // 2. 로그인
     public AuthResponseDto login(LoginRequestDto dto) {
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
@@ -90,6 +89,30 @@ public class AuthService {
     public void logout(String token) {
         tokenBlacklistService.addToBlacklist(token);
     }
+
+    // ⭐️ 로그인 유지(리프레시 토큰으로 Access/Refresh 재발급)
+    public AuthResponseDto refreshToken(String refreshToken) {
+        // 블랙리스트 체크
+        if (tokenBlacklistService.isBlacklisted(refreshToken)) {
+            throw new IllegalArgumentException("블랙리스트에 등록된 리프레시 토큰입니다.");
+        }
+        // 토큰 유효성 체크
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.");
+        }
+        // username 추출
+        String username = jwtUtil.getUsernameFromToken(refreshToken);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        String newAccessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole().name());
+        String newRefreshToken = jwtUtil.generateRefreshToken(user.getUsername());
+
+        return new AuthResponseDto(newAccessToken, newRefreshToken, user.getUsername(), user.getRole().name());
+    }
+
+    // ===== 아래 기존 코드 동일 =====
 
     public void updateProfileImage(String username, MultipartFile file) throws IOException {
         User user = userRepository.findByUsername(username)
@@ -129,7 +152,6 @@ public class AuthService {
         emailService.sendResetCode(user.getEmail(), code);
     }
 
-    // 2. 인증번호 검증
     @Transactional
     public void verifyPasswordResetCode(PasswordResetVerifyDto dto) {
         PasswordResetCode codeEntity = passwordResetCodeRepository.findByEmail(dto.getEmail())
@@ -143,13 +165,11 @@ public class AuthService {
         }
     }
 
-    // 3. 비밀번호 재설정 (비밀번호 찾기)
     @Transactional
     public void resetPassword(PasswordResetChangeDto dto) {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 이메일입니다."));
 
-        // 비밀번호 규칙 검사 추가!
         if (!PasswordValidator.isValid(dto.getNewPassword())) {
             throw new IllegalArgumentException("비밀번호는 8자 이상, 영문/숫자/특수문자를 각각 1개 이상 포함해야 합니다.");
         }
@@ -160,7 +180,6 @@ public class AuthService {
         passwordResetCodeRepository.deleteByEmail(dto.getEmail());
     }
 
-    // 4. 내 정보에서 비밀번호 변경
     @Transactional
     public void changePassword(String username, ChangePasswordDto dto) {
         User user = userRepository.findByUsername(username)
@@ -170,7 +189,6 @@ public class AuthService {
             throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
         }
 
-        // 비밀번호 규칙 검사 추가!
         if (!PasswordValidator.isValid(dto.getNewPassword())) {
             throw new IllegalArgumentException("비밀번호는 8자 이상, 영문/숫자/특수문자를 각각 1개 이상 포함해야 합니다.");
         }
@@ -216,7 +234,6 @@ public class AuthService {
 
         PostResponse resp = new PostResponse(post, likeCount, scrapCount, commentCount);
 
-        // mediaList 추가
         if (post.getMediaList() != null) {
             resp.setMediaList(
                     post.getMediaList().stream()
@@ -259,15 +276,8 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
 
-        // (선택) 연관 데이터도 삭제하거나 정리하고 싶다면 여기서 처리
-        // 예시:
-        // commentRepository.deleteByAuthor(user);
-        // likeRepository.deleteByUser(user);
-        // scrapRepository.deleteByUser(user);
-
         userRepository.delete(user);
 
-        // JWT 토큰 블랙리스트 등록
         if (token != null) {
             tokenBlacklistService.addToBlacklist(token);
         }

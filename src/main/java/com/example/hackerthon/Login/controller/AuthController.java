@@ -30,7 +30,6 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@Valid @RequestBody SignupRequestDto dto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            // 첫번째 에러 메시지 반환 (여러 개 있을 수 있음)
             String msg = Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage();
             return ResponseEntity.badRequest().body(msg);
         }
@@ -55,29 +54,35 @@ public class AuthController {
         return ResponseEntity.ok("로그아웃 성공");
     }
 
-    // 1) 비밀번호 재설정 - 인증번호 발송 요청
+    // ✅ 리프레시 토큰으로 access/refresh 재발급
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponseDto> refreshToken(@RequestHeader("Authorization") String refreshTokenHeader) {
+        if (refreshTokenHeader == null || !refreshTokenHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().build();
+        }
+        String refreshToken = refreshTokenHeader.substring(7);
+        AuthResponseDto res = authService.refreshToken(refreshToken);
+        return ResponseEntity.ok(res);
+    }
+
     @PostMapping("/password-reset/request")
     public ResponseEntity<String> requestPasswordReset(@RequestBody PasswordResetRequestDto dto) throws MessagingException {
         authService.requestPasswordReset(dto);
         return ResponseEntity.ok("비밀번호 재설정 인증번호를 이메일로 발송했습니다.");
     }
 
-    // 2) 인증번호 확인
     @PostMapping("/password-reset/verify")
     public ResponseEntity<String> verifyPasswordResetCode(@RequestBody PasswordResetVerifyDto dto) {
         authService.verifyPasswordResetCode(dto);
         return ResponseEntity.ok("인증번호가 유효합니다.");
     }
 
-    // 3) 비밀번호 변경 (이메일 + 새 비번)
     @PostMapping("/password-reset/change")
     public ResponseEntity<String> resetPassword(@RequestBody PasswordResetChangeDto dto) {
         authService.resetPassword(dto);
         return ResponseEntity.ok("비밀번호가 변경되었습니다.");
     }
 
-
-    // ⭐️ 로그인한 사용자가 내 정보에서 직접 비밀번호 변경
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(
             @RequestBody ChangePasswordDto dto,
@@ -88,7 +93,6 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호가 변경되었습니다.");
     }
 
-    // ⭐️ 프로필 사진 변경 (multipart/form-data)
     @PostMapping("/profile-image")
     public ResponseEntity<String> updateProfileImage(
             @RequestParam("file") MultipartFile file,
@@ -149,5 +153,4 @@ public class AuthController {
         List<PostResponse> result = authService.getPostsCommentedBy(username);
         return ResponseEntity.ok(result);
     }
-
 }
