@@ -268,12 +268,9 @@ false
 
 ### 📌 게시글 등록 `POST /api/posts`
 
-```json
-{
-  "title": "게시글 제목",
-  "content": "내용"
-}
-```
+* 이미지/동영상 포함 시: `multipart/form-data`
+
+  * 필드: `title`, `content`, `files`
 
 **Response**
 
@@ -283,7 +280,13 @@ false
   "title": "게시글 제목",
   "content": "내용",
   "author": "nickname",
-  "createdAt": "2024-07-01T00:00:00"
+  "createdAt": "2024-07-01T00:00:00",
+  "mediaList": [
+    {
+      "url": "/media/abc.jpg",
+      "type": "IMAGE"
+    }
+  ]
 }
 ```
 
@@ -400,6 +403,7 @@ false
 
 ```json
 {
+  "postId": 1,
   "content": "댓글 내용",
   "parentId": null
 }
@@ -409,6 +413,7 @@ false
 
 ```json
 {
+  "postId": 1,
   "content": "대댓글 내용",
   "parentId": 5
 }
