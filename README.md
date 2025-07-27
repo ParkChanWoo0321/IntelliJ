@@ -27,7 +27,6 @@ Spring Boot 기반의 러닝 커뮤니티 백엔드 프로젝트입니다. 회�
 * Java 17
 * Spring Boot 3.x
 * Spring Security + JWT
-* OAuth2 (Kakao, Google, Naver)
 * JPA (Hibernate)
 * MySQL
 * SSE (Server-Sent Events)
@@ -124,25 +123,10 @@ Spring Boot 기반의 러닝 커뮤니티 백엔드 프로젝트입니다. 회�
 * `POST /api/auth/logout`
 * Header: `Authorization: Bearer {token}`
 
-#### ✅ 소셜 로그인 (카카오/구글/네이버)
-
-* `/oauth2/authorization/{provider}` → 리다이렉트
-* 성공 시 JWT 발급 + 로그인 처리
-
 #### ✅ 내 정보 조회
 
 * `GET /api/auth/me`
 * Header: `Authorization`
-
-#### ✅ 내 정보 수정
-
-* `PATCH /api/auth/me`
-* Request: 닉네임, 프로필 이미지 변경
-
-#### ✅ 비밀번호 재설정
-
-* `POST /api/auth/reset-password`
-* 이메일 인증 포함 요청 필요
 
 #### ✅ 닉네임 중복 확인
 
@@ -387,10 +371,3 @@ Spring Boot 기반의 러닝 커뮤니티 백엔드 프로젝트입니다. 회�
   }
 ]
 ```
-
----
-
-## ✅ 개발자 정보
-
-* 프로젝트 이름: **Runny Buddy**
-* 문의: `contact@runningapp.com`
