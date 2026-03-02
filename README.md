@@ -497,10 +497,3 @@ false
 * AccessToken, RefreshToken 발급 포함
 
 ---
-
-## 📌 실시간 알림 Notification 구현 완료
-
-### ❌ 테스트 미실시
-
----
-
